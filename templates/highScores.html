@@ -1,0 +1,13 @@
+<!doctype html>
+<title>Flaskr</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+  <h1>Ball High Scores</h1>
+  <div class=metanav>
+  <table border="1"><tr><td>Name</td><td>Score</td></tr>
+  {% for score in scores %}
+    <tr><td>{{ score.username }}</td><td>{{ score.score }}</td></tr>
+  {% endfor %}</table>
+  </div>
+  {% block body %}{% endblock %}
+</div>
