@@ -38,8 +38,13 @@ def getNameOfWatch(name):
     
     results = r.table("nameMapping").filter(r.row['username']==name).run()
     for item in results:
-        print item
-    return name
+        return item['friendly']
+    else:
+	#add to database
+	print "in here!"
+	a={'username':name,'friendly':'default'}
+	r.table("nameMapping").insert(a).run()
+	return 'default'
 
 
 if __name__ == "__main__":
