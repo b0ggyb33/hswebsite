@@ -9,7 +9,7 @@ randomNameGenerator = rng()
 @app.route("/")
 def hello():
     r.connect().repl()
-    results = r.table("authors").order_by(r.desc("score")).limit(10).run()
+    results = r.table("scoreList").order_by(r.desc("score")).limit(10).run()
     for idx,result in enumerate(results):
         try:
             result['username']=getNameOfWatch(randomNameGenerator,result['username'])
@@ -27,7 +27,7 @@ def json():
     print data
     r.connect().repl()
     try:
-        r.db("test").table_create("authors").run()
+        r.db("test").table_create("scoreList").run()
     except r.ReqlOpFailedError:
         pass
     try:
