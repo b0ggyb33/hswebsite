@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<title>Ball</title>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -9,11 +9,11 @@
 <body>
 
 <div class="container">
-  <h2>Ball High Scores</h2>
-  <p>The .active class applies the hover color to a particular row or cell:</p>                                        
+  <h2>Ball High Scores</h2>                     
   <table class="table">
     <thead>
       <tr>
+        <th> # </th>
         <th>Name</th>
         <th>Score</th>
       </tr>
@@ -25,12 +25,13 @@
          {% else %}
          <tr>
          {% endif %}
-           <td>score.username</td>
-           <td>score.score</td>
+         <td>{{ score.index }}</td>
+         <td>{{ score.username }}</td>
+         <td>{{ score.score }}</td>
          </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 </body>
-</html>
+

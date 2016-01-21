@@ -1,5 +1,5 @@
 from flask import Flask, request,jsonify,render_template
-
+from RNG import rng
 import rethinkdb as r
 
 
@@ -7,12 +7,17 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
+    randomNameGenerator = rng()
     r.connect().repl()
     results = r.table("authors").order_by(r.desc("score")).limit(10).run()
-    for result in results:
-        result['username']=getNameOfWatch(result['username'])
+    for idx,result in enumerate(results):
+        try:
+            result['username']=getNameOfWatch(randomNameGenerator,result['username'])
+        except KeyError:
+            pass
+        result['index']=idx
 
-    return render_template('highScores.html', scores=results)
+    return render_template('bshighScores.html', scores=results)
 
 
 @app.route('/json', methods=['POST'])
@@ -30,7 +35,7 @@ def json():
     
     return jsonify(data)
 
-def getNameOfWatch(name):
+def getNameOfWatch(randomNameGenerator,name):
     try:
         r.db("test").table_create("nameMapping").run()
     except r.ReqlOpFailedError:
@@ -41,10 +46,10 @@ def getNameOfWatch(name):
         return item['friendly']
     else:
 	#add to database
-	print "in here!"
-	a={'username':name,'friendly':'default'}
-	r.table("nameMapping").insert(a).run()
-	return 'default'
+        print "in here!"
+        newData={'username':name,'friendly':randomNameGenerator.getName()}
+        r.table("nameMapping").insert(newData).run()
+        return newData['friendly']
 
 
 if __name__ == "__main__":
