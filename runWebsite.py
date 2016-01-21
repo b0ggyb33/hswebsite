@@ -4,10 +4,10 @@ import rethinkdb as r
 
 
 app = Flask(__name__)
+randomNameGenerator = rng()
 
 @app.route("/")
 def hello():
-    randomNameGenerator = rng()
     r.connect().repl()
     results = r.table("authors").order_by(r.desc("score")).limit(10).run()
     for idx,result in enumerate(results):
@@ -15,12 +15,12 @@ def hello():
             result['username']=getNameOfWatch(randomNameGenerator,result['username'])
         except KeyError:
             pass
-        result['index']=idx
+        result['index']=idx+1
 
     return render_template('bshighScores.html', scores=results)
 
 
-@app.route('/json', methods=['POST'])
+@app.route('/json', methods=['POST','GET'])
 def json():
 		
     data=request.get_json()
@@ -30,10 +30,18 @@ def json():
         r.db("test").table_create("authors").run()
     except r.ReqlOpFailedError:
         pass
+    try:
+        r.db("test").table_create("nameMapping").run()
+    except r.ReqlOpFailedError:
+        pass
     
-    r.table("authors").insert(data).run()
-    
+    if request.method == 'POST':
+        r.table("authors").insert(data).run()
+    if request.method == 'GET':
+        data=getNameOfWatch(randomNameGenerator,data['username'])
+        return data
     return jsonify(data)
+    
 
 def getNameOfWatch(randomNameGenerator,name):
     try:
@@ -46,7 +54,7 @@ def getNameOfWatch(randomNameGenerator,name):
         return item['friendly']
     else:
 	#add to database
-        print "in here!"
+        print "New player!"
         newData={'username':name,'friendly':randomNameGenerator.getName()}
         r.table("nameMapping").insert(newData).run()
         return newData['friendly']
