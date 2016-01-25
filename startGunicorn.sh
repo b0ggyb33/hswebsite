@@ -1,3 +1,3 @@
 #/bin/bash
-gunicorn -b 0.0.0.0:5000 runWebsite:app
+gunicorn -b 0.0.0.0:4000 runWebsite:app
 
