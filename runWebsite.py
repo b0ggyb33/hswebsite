@@ -9,7 +9,9 @@ randomNameGenerator = rng()
 @app.route("/")
 def hello():
     r.connect().repl()
-    results = r.table("authors").order_by(r.desc("score")).limit(10).run()
+    bestScorePerPlayer = r.table("authors").group("username").max("score").run()
+    results = r.expr(bestScorePerPlayer.values()).order_by(r.desc("score")).limit(10).run()
+
     for idx,result in enumerate(results):
         try:
             result['username']=getNameOfWatch(randomNameGenerator,result['username'])
