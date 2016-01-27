@@ -9,6 +9,10 @@ randomNameGenerator = rng()
 @app.route("/")
 def hello():
     r.connect().repl()
+    try:
+        r.db("test").table_create("authors").run()
+    except r.ReqlOpFailedError:
+        pass
     results = r.table("authors").order_by(r.desc("score")).limit(10).run()
     for idx,result in enumerate(results):
         try:
