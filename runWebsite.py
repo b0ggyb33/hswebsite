@@ -8,6 +8,19 @@ randomNameGenerator = rng()
 
 @app.route("/")
 def hello():
+    return render_template('index.html')
+
+def tabifyResult(scores):
+    for idx,score in enumerate(scores):
+        try:
+            score['username']=getNameOfWatch(randomNameGenerator,score['username'])
+        except KeyError:
+            pass
+        score['index']=idx+1
+
+
+@app.route("/ballscores")
+def scores():
     r.connect().repl()
 
     try:
@@ -16,18 +29,17 @@ def hello():
         pass
 
     bestScorePerPlayer = r.table("authors").group("username").max("score").run()
-    results = r.expr(bestScorePerPlayer.values()).order_by(r.desc("score")).limit(10).run()
+    topscoresPerPlayer = r.expr(bestScorePerPlayer.values()).order_by(r.desc("score")).limit(10).run()
+    topscoresofalltime = r.table("authors").order_by(r.desc("score")).limit(10).run()
+    
+    tabifyResult(topscoresPerPlayer)
+    tabifyResult(topscoresofalltime)
+    
+    return render_template('bshighScores.html', topscoresByPlayerTable=topscoresPerPlayer,topscoresalltimeTable=topscoresofalltime)
 
-
-    for idx,result in enumerate(results):
-        try:
-            result['username']=getNameOfWatch(randomNameGenerator,result['username'])
-        except KeyError:
-            pass
-        result['index']=idx+1
-
-    return render_template('bshighScores.html', scores=results)
-
+@app.route('/about')
+def aboutPage():
+    return render_template('about.html')
 
 @app.route('/json', methods=['POST'])
 def json():
