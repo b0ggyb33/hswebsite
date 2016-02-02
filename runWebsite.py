@@ -19,34 +19,40 @@ def tabifyResult(scores):
         score['index']=idx+1
 
 
-@app.route("/ballscores")
-def scores():
+def renderScores(nameOfTable, GameName):
     r.connect().repl()
 
     try:
-        r.db("test").table_create("authors").run()
+        r.db("test").table_create(nameOfTable).run()
     except r.ReqlOpFailedError:
         pass
 
-    bestScorePerPlayer = r.table("authors").group("username").max("score").run()
+    bestScorePerPlayer = r.table(nameOfTable).group("username").max("score").run()
     topscoresPerPlayer = r.expr(bestScorePerPlayer.values()).order_by(r.desc("score")).limit(10).run()
-    topscoresofalltime = r.table("authors").order_by(r.desc("score")).limit(10).run()
+    topscoresofalltime = r.table(nameOfTable).order_by(r.desc("score")).limit(10).run()
     
     tabifyResult(topscoresPerPlayer)
     tabifyResult(topscoresofalltime)
     
-    return render_template('bshighScores.html', topscoresByPlayerTable=topscoresPerPlayer,topscoresalltimeTable=topscoresofalltime)
+    return render_template('bshighScores.html',gameName=GameName, topscoresByPlayerTable=topscoresPerPlayer,topscoresalltimeTable=topscoresofalltime)
+
+
+@app.route("/ballscores")
+def ball():
+    return renderScores("authors","Ball")
+
+@app.route("/firescores")
+def fire():
+    return renderScores("fire","Fire")
 
 @app.route('/about')
 def aboutPage():
     return render_template('about.html')
 
-@app.route('/json', methods=['POST'])
-def json():
-    data=request.get_json()
+def submitJson(tableName,data):
     r.connect().repl()
     try:
-        r.db("test").table_create("authors").run()
+        r.db("test").table_create(tableName).run()
     except r.ReqlOpFailedError:
         pass
     try:
@@ -58,9 +64,17 @@ def json():
             data=getNameOfWatch(randomNameGenerator,data['username'])
             return data
         elif data['type']=="score":
-            r.table("authors").insert(data).run()
+            r.table(tableName).insert(data).run()
             return "submitted"
-    return " "
+    return "xx"
+
+@app.route('/json', methods=['POST'])
+def json():
+    return submitJson("authors",request.get_json())
+    
+@app.route('/jsonFire', methods=['POST'])
+def jsonFire():
+    return submitJson("fire",request.get_json())
     
 
 def getNameOfWatch(randomNameGenerator,name):
